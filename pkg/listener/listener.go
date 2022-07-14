@@ -1,22 +1,23 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"net/http"
+	"time"
 )
 
-func home(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "[Worker 1] Hi there!")
-}
-
-func handleRequests() {
-	http.HandleFunc("/", home)
-	http.Get(":3000")
-}
-
 func main() {
+	log.Println("Listener is active")
+	url := "http://192.168.39.29:30100"
 	for {
-		handleRequests()
+		log.Println("Sending a request")
+		resp, err := http.Get(url)
+		if err != nil {
+			log.Println("Got error: ", err)
+		}
+		defer resp.Body.Close()
 
+		log.Println("Got response: ", resp.Body)
+		time.Sleep(1 * time.Second)
 	}
 }

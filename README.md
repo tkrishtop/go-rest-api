@@ -30,8 +30,6 @@ $ curl localhost:3000
 $ podman push quay.io/tkrishtop/webapp:speaker
 ```
 
-Build listener image
-
 ## Deployment on k8s
 
 For the reference: [Install minikube on Fedora36](https://www.tutorialworks.com/kubernetes-fedora-dev-setup/).
@@ -59,5 +57,25 @@ speaker-service   NodePort    10.109.33.238   <none>        3000:30100/TCP   34s
 
 $ curl 192.168.39.2:30100
 [Speaker] Hi there!
+
+$ kubectl logs -l app=speaker
+2022/07/14 22:06:21 Speaker is active
+2022/07/14 22:06:38 Got request, going to speak
+2022/07/14 22:06:18 Speaker is active
+2022/07/14 22:06:20 Speaker is active
+
+# to restart
+$ kubectl get deploy
+$ kubectl rollout restart deploy speaker-deployment
 ```
 
+## Adding listener
+
+```
+$ go run pkg/listener/listener.go 
+2022/07/15 00:27:47 Listener is active
+2022/07/15 00:27:47 Sending a request
+2022/07/15 00:27:47 Got response:  &{0xc0000ec280 {0 0} false <nil> 0x60aea0 0x60afa0}
+2022/07/15 00:27:48 Sending a request
+2022/07/15 00:27:48 Got response:  &{0xc00020e000 {0 0} false <nil> 0x60aea0 0x60afa0}
+```

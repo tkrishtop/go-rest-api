@@ -17,6 +17,7 @@ spec:
       containers:
       - name: speaker
         image: quay.io/tkrishtop/webapp:speaker
+        imagePullPolicy: Always
         ports:
         - containerPort: 3000
 ---
