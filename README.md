@@ -4,37 +4,33 @@
 
 ```console
 # main terminal
-go run main.go
+$ go run pkg/speaker/speaker.go
 
 # another terminal
 $ curl localhost:3000
-[Worker 1] Hi there!
+[Speaker] Hi there!
 ```
-
-![homepage](readme/homepage.png)
 
 ## Dockerization
 
-```
-# main terminal
-$ podman build -t quay.io/tkrishtop/webapp:distroless .
-$ podman run -rm -p 3000:3000 -d --name webapp -t quay.io/tkrishtop/webapp:distroless
-$ curl localhost:3000
-[Worker 1] Hi there!
-```
-
-Let's compare ubi and distroless images by size:
+Side note: distroless vs ubi: 241 MB vs 9.94 MB
 ```
 $ podman images | grep webapp
 quay.io/tkrishtop/webapp                                           distroless                                b8e1f29ab611  10 seconds ago  9.94 MB
 quay.io/tkrishtop/webapp                                           ubi                                       a797dc42dbb5  17 minutes ago  241 MB
 ```
 
-The image is pushed in quay.io
+Build speaker image
 
 ```
-podman pull quay.io/tkrishtop/webapp:distroless
+$ podman build -f Dockerfile_speaker -t quay.io/tkrishtop/webapp:speaker .
+$ podman run -rm -p 3000:3000 -d --name webapp -t quay.io/tkrishtop/webapp:speaker
+$ curl localhost:3000
+[Speaker] Hi there!
+$ podman push quay.io/tkrishtop/webapp:speaker
 ```
+
+Build listener image
 
 ## Deployment on k8s
 
@@ -42,30 +38,26 @@ For the reference: [Install minikube on Fedora36](https://www.tutorialworks.com/
 
 ```
 $ minikube start --driver=kvm2
-$ kubectl get node -o wide
-NAME       STATUS   ROLES                  AGE   VERSION   INTERNAL-IP      EXTERNAL-IP   OS-IMAGE              KERNEL-VERSION   CONTAINER-RUNTIME
-minikube   Ready    control-plane,master   20m   v1.23.3   192.168.39.131   <none>        Buildroot 2021.02.4   4.19.202         docker://20.10.12
-
 $ minikube ip
-192.168.39.131
+192.168.39.2
 
-$ kubectl apply -f deployment/webapp.yaml 
-deployment.apps/webapp-deployment created
-service/webapp-service created
+# deploy speaker
+$ kubectl apply -f deployment/webapp_speaker.yaml 
+deployment.apps/speaker-deployment created
+service/speaker-service created
 
 $ kubectl get pod
-NAME                                READY   STATUS    RESTARTS   AGE
-webapp-deployment-8b946c8f5-4bszb   1/1     Running   0          18m
-webapp-deployment-8b946c8f5-9jw7v   1/1     Running   0          18m
-webapp-deployment-8b946c8f5-lpbqx   1/1     Running   0          18m
+NAME                                  READY   STATUS    RESTARTS   AGE
+speaker-deployment-6b6c7f679d-6pg8j   1/1     Running   0          13s
+speaker-deployment-6b6c7f679d-dscb4   1/1     Running   0          13s
+speaker-deployment-6b6c7f679d-j84gp   1/1     Running   0          13s
 
 $ kubectl get svc
-NAME             TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)          AGE
-kubernetes       ClusterIP   10.96.0.1     <none>        443/TCP          22m
-webapp-service   NodePort    10.111.56.3   <none>        3000:30100/TCP   19m
+NAME              TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+kubernetes        ClusterIP   10.96.0.1       <none>        443/TCP          73s
+speaker-service   NodePort    10.109.33.238   <none>        3000:30100/TCP   34s
 
-
-$ curl 192.168.39.131:30100
-[Worker 1] Hi there!
+$ curl 192.168.39.2:30100
+[Speaker] Hi there!
 ```
 

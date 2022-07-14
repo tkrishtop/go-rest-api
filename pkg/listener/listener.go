@@ -11,9 +11,12 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 func handleRequests() {
 	http.HandleFunc("/", home)
-	http.ListenAndServe(":3000", nil)
+	http.Get(":3000")
 }
 
 func main() {
-	handleRequests()
+	for {
+		handleRequests()
+
+	}
 }
