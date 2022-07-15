@@ -1,0 +1,21 @@
+# builder
+FROM golang:1.18 as builder
+
+COPY . /go/src/listener
+WORKDIR /go/src/listener
+
+RUN go mod download
+RUN CGO_ENABLED=0 go build -o /go/bin/listener pkg/listener/listener.go
+
+# application construction
+FROM registry.access.redhat.com/ubi8/ubi:latest
+# FROM gcr.io/distroless/static-debian11
+
+# Metadata
+LABEL name="Webapp" \
+      maintainer="tkrishtop" \
+      summary="Listener webapp on Golang."
+LABEL quay.expires-after=never
+
+COPY --from=builder /go/bin/listener /
+CMD ["/listener"]

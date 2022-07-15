@@ -24,10 +24,17 @@ Build speaker image
 
 ```
 $ podman build -f Dockerfile_speaker -t quay.io/tkrishtop/webapp:speaker .
-$ podman run -rm -p 3000:3000 -d --name webapp -t quay.io/tkrishtop/webapp:speaker
+$ podman run --rm -p 3000:3000 -d --name webapp -t quay.io/tkrishtop/webapp:speaker
 $ curl localhost:3000
 [Speaker] Hi there!
 $ podman push quay.io/tkrishtop/webapp:speaker
+```
+
+Build listener image
+
+```
+$ podman build -f Dockerfile_listener -t quay.io/tkrishtop/webapp:listener .
+$ podman push quay.io/tkrishtop/webapp:listener
 ```
 
 ## Deployment on k8s
@@ -37,25 +44,31 @@ For the reference: [Install minikube on Fedora36](https://www.tutorialworks.com/
 ```
 $ minikube start --driver=kvm2
 $ minikube ip
-192.168.39.2
+192.168.39.23
 
-# deploy speaker
-$ kubectl apply -f deployment/webapp_speaker.yaml 
+$ kubectl apply -f deployment/speaker.yaml
 deployment.apps/speaker-deployment created
 service/speaker-service created
+$ kubectl apply -f deployment/listener-config.yaml
+configmap/listener-config created
+$ kubectl apply -f deployment/listener.yaml
+deployment.apps/listener-deployment created
+service/listener-service created
 
 $ kubectl get pod
 NAME                                  READY   STATUS    RESTARTS   AGE
-speaker-deployment-6b6c7f679d-6pg8j   1/1     Running   0          13s
-speaker-deployment-6b6c7f679d-dscb4   1/1     Running   0          13s
-speaker-deployment-6b6c7f679d-j84gp   1/1     Running   0          13s
+listener-deployment-554f69bb5-k4drx   1/1     Running   0          65s
+speaker-deployment-559b7954b4-hnggg   1/1     Running   0          66m
+speaker-deployment-559b7954b4-j6jxt   1/1     Running   0          66m
+speaker-deployment-559b7954b4-rlcnv   1/1     Running   0          66m
 
 $ kubectl get svc
-NAME              TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
-kubernetes        ClusterIP   10.96.0.1       <none>        443/TCP          73s
-speaker-service   NodePort    10.109.33.238   <none>        3000:30100/TCP   34s
+NAME               TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+kubernetes         ClusterIP   10.96.0.1       <none>        443/TCP          66m
+listener-service   NodePort    10.109.35.179   <none>        3001:30101/TCP   64m
+speaker-service    NodePort    10.107.196.68   <none>        3000:30100/TCP   66m
 
-$ curl 192.168.39.2:30100
+$ curl 192.168.39.23:30100
 [Speaker] Hi there!
 
 $ kubectl logs -l app=speaker
@@ -64,18 +77,14 @@ $ kubectl logs -l app=speaker
 2022/07/14 22:06:18 Speaker is active
 2022/07/14 22:06:20 Speaker is active
 
+$ kubectl logs -l app=listener
+2022/07/14 23:56:41 Sending a request
+2022/07/14 23:56:41 Got response:  &{0xc0002fb440 {0 0} false <nil> 0x606e20 0x606f20}
+2022/07/14 23:56:42 Sending a request
+2022/07/14 23:56:42 Got response:  &{0xc000346e40 {0 0} false <nil> 0x606e20 0x606f20}
+2022/07/14 23:56:43 Sending a request
+
 # to restart
 $ kubectl get deploy
 $ kubectl rollout restart deploy speaker-deployment
-```
-
-## Adding listener
-
-```
-$ go run pkg/listener/listener.go 
-2022/07/15 00:27:47 Listener is active
-2022/07/15 00:27:47 Sending a request
-2022/07/15 00:27:47 Got response:  &{0xc0000ec280 {0 0} false <nil> 0x60aea0 0x60afa0}
-2022/07/15 00:27:48 Sending a request
-2022/07/15 00:27:48 Got response:  &{0xc00020e000 {0 0} false <nil> 0x60aea0 0x60afa0}
 ```
