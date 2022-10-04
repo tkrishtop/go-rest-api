@@ -3,4 +3,7 @@ kind: ConfigMap
 metadata:
   name: listener-config
 data:
-  speaker-url: speaker-service
+  winnie-url: winnie-service
+  winnie-port: ":3000"
+  piglet-url: piglet-service
+  piglet-port: ":3002"

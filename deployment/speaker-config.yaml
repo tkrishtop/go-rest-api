@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: speaker-config
+data:
+  winnie-name: winnie
+  winnie-port: ":3000"
+  winnie-speech: "Hallo, Rabbit, isn't that you?"
+  piglet-name: piglet
+  piglet-port: ":3002"
+  piglet-speech: "Isn't that Rabbit's voice?"
+  rabbit-name: rabbit
+  rabbit-speech: "Let's pretend it isn't, and see what happens."
