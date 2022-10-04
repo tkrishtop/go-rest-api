@@ -14,14 +14,14 @@ func callUrl(url string) string {
 
 	response, err := http.Get(url)
 	if err != nil {
-		log.Println("[listener] There is an error to call url, ignore it", err)
+		log.Println("[listener] There is an error while calling url, ignore it and return empty reply:", err)
 		return ""
 	}
 	defer response.Body.Close()
 
 	responseData, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		log.Println("[listener] There is an error convert response data, ignore it", err)
+		log.Println("[listener] There is an error while converting response data, ignore it and return empty reply:", err)
 		return ""
 	}
 
