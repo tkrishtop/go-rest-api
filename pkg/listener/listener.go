@@ -44,17 +44,23 @@ func gatherRequests(w http.ResponseWriter, r *http.Request) {
 	// collect replies from all speakers
 	wg := sync.WaitGroup{}
 	wg.Add(len(speakers))
-	concatenatedResponse := ""
+	responseChan := make(chan string, len(speakers))
 
 	for idx, urlBase := range speakers {
 		urlString := "http://" + urlBase + ports[idx]
 		go func(s string) {
 			defer wg.Done()
-			concatenatedResponse += callUrl(s)
+			responseChan <- callUrl(s)
 		}(urlString)
 	}
 
 	wg.Wait()
+	// build concatenated response
+	concatenatedResponse := ""
+	for range speakers {
+		concatenatedResponse += <-responseChan
+	}
+
 	w.Header().Set("Content-Type", "text/plain")
 	fmt.Fprintf(w, "Concatenated replies: \n%s \n", concatenatedResponse)
 }

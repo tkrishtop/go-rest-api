@@ -7,9 +7,11 @@ It collects all replies and return their concatenation.
 
 TODO:
 
-- Do it concurrently using goroutines inside listener.
+- Implement properties file in the configMap to abstract listener from the list of services to call
 
-- Do not mind about speaker dying and ignore the absence of reply.
+- Implement global context to gracefully stop the application
+
+- Implement local ctx to handle service timeout. Do not mind about speaker dying and ignore the absence of reply.
 
 ## Dockerization
 
