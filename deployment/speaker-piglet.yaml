@@ -36,6 +36,11 @@ spec:
             configMapKeyRef:
               name: speaker-config
               key: piglet-speech
+        - name: SPEAKER_DELAY
+          valueFrom:
+            configMapKeyRef:
+              name: speaker-config
+              key: piglet-delay
 ---
 apiVersion: v1
 kind: Service

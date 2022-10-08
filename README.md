@@ -7,9 +7,8 @@ It collects all replies and return their concatenation.
 
 TODO:
 
-- Implement local ctx to handle service timeout. Do not mind about speaker dying and ignore the absence of reply.
+- Implement global context to gracefully stop the application, handle errors and timeouts 
 
-- Implement global context to gracefully stop the application
 
 ## Dockerization
 

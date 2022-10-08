@@ -5,9 +5,17 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
+	"time"
 )
 
-func getEnv(key, fallback string) string {
+type Speaker struct {
+	Name   string
+	Speech string
+	Delay  string
+}
+
+func getEnv(key string, fallback string) string {
 	if value, ok := os.LookupEnv(key); ok {
 		return value
 	}
@@ -15,12 +23,20 @@ func getEnv(key, fallback string) string {
 }
 
 func speak(w http.ResponseWriter, r *http.Request) {
-	speakerName := getEnv("SPEAKER_NAME", "unknown")
-	speakerSpeech := getEnv("SPEAKER_SPEECH", "UnknownSpeech")
+	s := Speaker{
+		Name:   getEnv("SPEAKER_NAME", "unknown"),
+		Speech: getEnv("SPEAKER_SPEECH", "UnknownSpeech"),
+		Delay:  getEnv("SPEAKER_DELAY", "0"),
+	}
 
-	log.Println(speakerName, "got a request, going to tell:", speakerSpeech)
+	log.Println(s.Name, "( delay in seconds:", s.Delay, ") got a request, going to tell:", s.Speech)
+
+	// this sleep is to simulate timeout
+	intDelay, _ := strconv.Atoi(s.Delay)
+	time.Sleep(time.Duration(intDelay) * time.Second)
+
 	w.Header().Set("Content-Type", "text/plain")
-	fmt.Fprintf(w, "[%s] said: %s \n", speakerName, speakerSpeech)
+	fmt.Fprintf(w, "[%s] said: %s \n", s.Name, s.Speech)
 }
 
 func handleRequests() {
@@ -32,6 +48,5 @@ func handleRequests() {
 func main() {
 	speakerName := getEnv("SPEAKER_NAME", "unknown")
 	log.Println(speakerName, "is active")
-
 	handleRequests()
 }
