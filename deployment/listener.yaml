@@ -21,26 +21,25 @@ spec:
           ports:
             - containerPort: 3003
           env:
-            - name: WINNIE_URL
+            - name: CONFIG_FILE
               valueFrom:
                 configMapKeyRef:
                   name: listener-config
-                  key: winnie-url
-            - name: PIGLET_URL
-              valueFrom:
-                configMapKeyRef:
-                  name: listener-config
-                  key: piglet-url
-            - name: WINNIE_PORT
-              valueFrom:
-                configMapKeyRef:
-                  name: listener-config
-                  key: winnie-port
-            - name: PIGLET_PORT
-              valueFrom:
-                configMapKeyRef:
-                  name: listener-config
-                  key: piglet-port
+                  key: config_file
+          volumeMounts:
+            - name: config
+              mountPath: "/config"
+              readOnly: true
+      volumes:
+        # You set volumes at the Pod level, then mount them into containers inside that Pod
+        - name: config
+          configMap:
+            # Provide the name of the ConfigMap you want to mount.
+            name: listener-config
+            # An array of keys from the ConfigMap to create as files
+            items:
+            - key: "speakers-config.yaml"
+              path: "speakers-config.yaml"
 ---
 apiVersion: v1
 kind: Service

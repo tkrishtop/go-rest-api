@@ -7,15 +7,13 @@ It collects all replies and return their concatenation.
 
 TODO:
 
-- Implement properties file in the configMap to abstract listener from the list of services to call
+- Implement local ctx to handle service timeout. Do not mind about speaker dying and ignore the absence of reply.
 
 - Implement global context to gracefully stop the application
 
-- Implement local ctx to handle service timeout. Do not mind about speaker dying and ignore the absence of reply.
-
 ## Dockerization
 
-Side note: distroless vs ubi: 9.94 MB vs 241 MB
+Side note: distroless 9.94 MB vs ubi 241 MB
 ```
 $ podman images | grep webapp
 quay.io/tkrishtop/webapp                                           distroless                                b8e1f29ab611  10 seconds ago  9.94 MB
@@ -86,19 +84,30 @@ winnie-service     NodePort    10.103.46.135    <none>        3000:30100/TCP   2
 $ curl $(minikube ip):30103/speakers
 Concatenated replies: 
 [winnie] said: Hallo, Rabbit, isn't that you? 
-[piglet] said: Isn't that Rabbit's voice? 
 
-$ kubectl logs -l app=listener
-2022/10/04 10:45:25 Listener is active
-2022/10/04 10:46:08 [listener] Got a list of URLs [winnie-service piglet-service]
-2022/10/04 10:46:08 [listener] Calling URL: http://winnie-service:3000
-2022/10/04 10:46:08 [listener] Calling URL: http://piglet-service:3002
+$ kubectl logs -l app=listener -f
+2022/10/08 15:11:11 Going to read config file:  /config/speakers-config.yaml
+2022/10/08 15:11:11 Going to unmarchall configuration
+2022/10/08 15:11:11 List of speakers to call:  [{winnie winnie-service :3000} {piglet piglet-service :3002}]
+2022/10/08 15:11:11 Calling speaker winnie
+2022/10/08 15:11:11 Calling speaker piglet
+2022/10/08 15:11:11 Calling URL: http://piglet-service:3002
+2022/10/08 15:11:11 Calling URL: http://winnie-service:3000
+2022/10/08 15:11:11 There is an error while calling url, ignore it and return empty reply: Get "http://piglet-service:3002": dial tcp 10.110.191.158:3002: connect: connection refused
 
-$ kubectl logs -l app=speaker
-2022/10/04 10:43:30 winnie is active
-2022/10/04 10:46:08 winnie got a request, going to tell: Hallo, Rabbit, isn't that you?
-2022/10/04 10:43:33 piglet is active
-2022/10/04 10:46:08 piglet got a request, going to tell: Isn't that Rabbit's voice?
+$ curl $(minikube ip):30103/speakers
+Concatenated replies: 
+[winnie] said: Hallo, Rabbit, isn't that you? 
+[piglet] said: Isn't that Rabbit's voice?
+
+$ kubectl logs -l app=listener -f
+2022/10/08 15:11:19 Going to read config file:  /config/speakers-config.yaml
+2022/10/08 15:11:19 Going to unmarchall configuration
+2022/10/08 15:11:19 List of speakers to call:  [{winnie winnie-service :3000} {piglet piglet-service :3002}]
+2022/10/08 15:11:19 Calling speaker winnie
+2022/10/08 15:11:19 Calling speaker piglet
+2022/10/08 15:11:19 Calling URL: http://piglet-service:3002
+2022/10/08 15:11:19 Calling URL: http://winnie-service:3000
 
 # to restart
 $ kubectl get deploy
