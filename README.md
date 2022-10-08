@@ -1,4 +1,4 @@
-# REST API on Golang
+# Kuberneters-native Golang web application with concurrency
 
 ## Idea
 
