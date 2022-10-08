@@ -2,8 +2,9 @@
 
 ## Idea
 
-Listener is a web server and could send client requests to all known speakers when called as `/speakers`.
-It collects all replies and return their concatenation.
+Listener is a web server that could send client requests to many speakers. Being called at `/speakers` endpoint, it collects the replies from all speakers listed in deployment/listener-config.yaml and returns their concatenation.
+
+![flowchart](images/flowchart.png)
 
 TODO:
 
